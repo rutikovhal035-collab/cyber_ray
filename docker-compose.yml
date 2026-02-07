@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=malware_sandbox
+      - REDIS_URL=redis://redis:6379
+      - CAPE_API_URL=http://cape:8000
+      - DEBUG=true
+    volumes:
+      - ./backend:/app
+      - uploads_data:/app/uploads
+      - yara_rules:/app/yara_rules
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - sandbox_network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - sandbox_network
+    restart: unless-stopped
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - sandbox_network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sandbox_network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  redis_data:
+  uploads_data:
+  yara_rules:
+
+
+networks:
+  sandbox_network:
+    driver: bridge
