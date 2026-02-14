@@ -1,8 +1,6 @@
-# CyberAy - Malware Analysis Sandbox
+# CybeRay - Malware Analysis Sandbox
 
 A GUI-based malware analysis platform with CAPEv2 integration, featuring static/dynamic analysis, behavior graphs, and automatic YARA rule generation.
-
-![Dashboard Preview](https://via.placeholder.com/800x400?text=Malware+Analysis+Sandbox)
 
 ## 🚀 Features
 
@@ -26,10 +24,6 @@ A GUI-based malware analysis platform with CAPEv2 integration, featuring static/
 - **Vite** - Build tool
 
 ---
-
-> [!TIP]
-> **Optimized for 4GB RAM / i3 CPU**: This project is configured to run efficiently on limited hardware by offloading the database and cache to the cloud and running services natively without Docker.
-
 ## 📦 Installation
 
 ### Prerequisites
