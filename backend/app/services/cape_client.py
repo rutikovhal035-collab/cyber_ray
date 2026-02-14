@@ -139,12 +139,13 @@ class CAPEClient:
                 await asyncio.sleep(retry_interval)
                 
             except httpx.ConnectError:
-                # Return mock report for development
+                print(f"Connection error to CAPE for task {task_id} - returning mock report")
                 return self._mock_report(task_id)
             except Exception as e:
-                print(f"Error getting report: {e}")
+                print(f"Error polling CAPE report for {task_id}: {e}")
                 await asyncio.sleep(retry_interval)
         
+        print(f"Max retries reached for CAPE task {task_id} - returning mock report")
         return self._mock_report(task_id)
     
     def _mock_report(self, task_id: str) -> Dict[str, Any]:

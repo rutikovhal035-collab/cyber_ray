@@ -184,7 +184,7 @@ function Dashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="stats-grid">
+            <div className="stats-grid mb-xl">
                 <div className="stat-card">
                     <div className="stat-label">
                         <FileSearch size={18} />
@@ -218,52 +218,8 @@ function Dashboard() {
                 </div>
             </div>
 
-            {/* Charts Row */}
-            <div className="charts-row">
-                <div className="card chart-card">
-                    <div className="card-header">
-                        <h3 className="card-title">
-                            <Shield size={20} />
-                            Threat Distribution
-                        </h3>
-                    </div>
-                    <div className="chart-container doughnut-chart">
-                        <Doughnut
-                            data={threatChartData}
-                            options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '65%',
-                                plugins: {
-                                    legend: {
-                                        position: 'right',
-                                        labels: {
-                                            color: '#94a3b8',
-                                            padding: 15,
-                                            usePointStyle: true
-                                        }
-                                    }
-                                }
-                            }}
-                        />
-                    </div>
-                </div>
-
-                <div className="card chart-card">
-                    <div className="card-header">
-                        <h3 className="card-title">
-                            <TrendingUp size={20} />
-                            Daily Activity
-                        </h3>
-                    </div>
-                    <div className="chart-container bar-chart">
-                        <Bar data={activityChartData} options={chartOptions} />
-                    </div>
-                </div>
-            </div>
-
             {/* Recent Analyses */}
-            <div className="card">
+            <div className="card mb-xl">
                 <div className="card-header">
                     <h3 className="card-title">
                         <Activity size={20} />
@@ -317,6 +273,50 @@ function Dashboard() {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Charts Row */}
+            <div className="charts-row">
+                <div className="card chart-card">
+                    <div className="card-header">
+                        <h3 className="card-title">
+                            <Shield size={20} />
+                            Threat Distribution
+                        </h3>
+                    </div>
+                    <div className="chart-container doughnut-chart">
+                        <Doughnut
+                            data={threatChartData}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '65%',
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            color: '#94a3b8',
+                                            padding: 15,
+                                            usePointStyle: true
+                                        }
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="card chart-card">
+                    <div className="card-header">
+                        <h3 className="card-title">
+                            <TrendingUp size={20} />
+                            Daily Activity
+                        </h3>
+                    </div>
+                    <div className="chart-container bar-chart">
+                        <Bar data={activityChartData} options={chartOptions} />
+                    </div>
+                </div>
             </div>
         </div>
     )

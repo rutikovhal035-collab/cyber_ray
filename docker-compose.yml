@@ -20,7 +20,6 @@ services:
       - yara_rules:/app/yara_rules
     depends_on:
       - mongodb
-      - redis
     networks:
       - sandbox_network
     restart: unless-stopped
@@ -54,20 +53,9 @@ services:
       - sandbox_network
     restart: unless-stopped
 
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - sandbox_network
-    restart: unless-stopped
 
 volumes:
   mongodb_data:
-  redis_data:
   uploads_data:
   yara_rules:
 

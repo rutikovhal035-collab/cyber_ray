@@ -45,21 +45,31 @@ async def save_upload_file(upload_file: UploadFile, destination: str):
 async def run_analysis(task_id: str, file_path: str):
     """Background task to run full analysis"""
     try:
+        print(f"Starting analysis for task {task_id}, file: {file_path}")
         # Update status to running
         analysis_tasks[task_id]["status"] = AnalysisStatus.RUNNING
         
         # Run static analysis
-        static_result = static_analyzer.analyze(file_path)
-        analysis_tasks[task_id]["static_analysis"] = static_result
+        print(f"Running static analysis for {task_id}")
+        try:
+            static_result = static_analyzer.analyze(file_path)
+            analysis_tasks[task_id]["static_analysis"] = static_result
+            print(f"Static analysis completed for {task_id}")
+        except Exception as se:
+            print(f"Static analysis failed for {task_id}: {se}")
+            static_result = None
         
         # Submit to CAPEv2 for dynamic analysis
+        print(f"Submitting {task_id} to CAPE")
         cape_task = await cape_client.submit_file(file_path)
         if cape_task:
             analysis_tasks[task_id]["cape_task_id"] = cape_task.get("task_id")
+            print(f"CAPE task created: {cape_task.get('task_id')} for {task_id}")
             
-            # Poll for results (simplified - in production use Celery)
+            # Poll for results
             report = await cape_client.get_report(cape_task.get("task_id"))
             if report:
+                print(f"CAPE report retrieved for {task_id}")
                 dynamic_result = cape_client.parse_report(report)
                 analysis_tasks[task_id]["dynamic_analysis"] = dynamic_result
                 
@@ -69,6 +79,37 @@ async def run_analysis(task_id: str, file_path: str):
                     dynamic_result
                 )
                 analysis_tasks[task_id]["behavior_graph"] = behavior_graph
+                
+                # AUTOMATIC YARA GENERATION
+                print(f"Generating automatic YARA rule for {task_id}")
+                try:
+                    from app.services.yara_generator import YARAGenerator
+                    from app.routes.yara import yara_rules, save_rule_to_file
+                    from app.models.schemas import YARARule
+                    
+                    yara_gen = YARAGenerator()
+                    rule_content = yara_gen.generate_rule(
+                        task_id=task_id,
+                        static_analysis=static_result,
+                        dynamic_analysis=dynamic_result
+                    )
+                    
+                    rule_id = str(uuid.uuid4())
+                    rule_obj = YARARule(
+                        id=rule_id,
+                        name=f"auto_{task_id[:8]}",
+                        description=f"Auto-generated rule for {analysis_tasks[task_id]['filename']}",
+                        rule_content=rule_content,
+                        source_task_id=task_id,
+                        tags=["automatic"]
+                    )
+                    yara_rules[rule_id] = rule_obj.model_dump()
+                    await save_rule_to_file(rule_obj)
+                    print(f"YARA rule {rule_id} generated automatically for {task_id}")
+                except Exception as ye:
+                    print(f"Automatic YARA generation failed for {task_id}: {ye}")
+            else:
+                print(f"CAPE report failed for {task_id}")
         
         # Calculate threat score
         threat_score, threat_level = calculate_threat_score(
@@ -81,8 +122,12 @@ async def run_analysis(task_id: str, file_path: str):
         # Mark as completed
         analysis_tasks[task_id]["status"] = AnalysisStatus.COMPLETED
         analysis_tasks[task_id]["completed_at"] = datetime.utcnow()
+        print(f"Analysis completed successfully for {task_id}")
         
     except Exception as e:
+        print(f"Full analysis failed for task {task_id}: {e}")
+        import traceback
+        traceback.print_exc()
         analysis_tasks[task_id]["status"] = AnalysisStatus.FAILED
         analysis_tasks[task_id]["error"] = str(e)
 
