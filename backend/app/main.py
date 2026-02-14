@@ -15,10 +15,10 @@ from app.core.config import settings
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    print("🚀 Malware Analysis Sandbox API starting...")
+    print("Malware Analysis Sandbox API starting...")
     yield
     # Shutdown
-    print("👋 Shutting down...")
+    print("Shutting down...")
 
 
 app = FastAPI(
